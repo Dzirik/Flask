@@ -7,6 +7,21 @@ import json
 app = Flask(__name__)
 books = [
     {
+        "name": "A",
+        "price": 7.99,
+        "isbn": 1
+    },
+    {
+        "name": "B",
+        "price": 17.99,
+        "isbn": 2
+    },
+    {
+        "name": "C",
+        "price": 27.99,
+        "isbn": 3
+    },
+    {
         "name": "Green Eggs and Ham",
         "price": 7.99,
         "isbn": 123456
@@ -17,6 +32,47 @@ books = [
         "isbn": 234567
     }
 ]
+
+# PATCH
+@app.route("/books/<int:isbn>", methods=["PATCH"])
+def update_book(isbn):
+    request_data = request.get_json()
+    updated_book = {}
+    if ("name" in request_data):
+        updated_book["name"] = request_data["name"]
+    if ("price" in request_data):
+        updated_book["price"] = request_data["price"]
+    for book in books:
+        if book["isbn"] == isbn:
+            book.update(updated_book)
+    response = Response("", status=204)
+    response.headers["Location"] = "/books/" + str(isbn)
+    return response
+
+# PUT
+@app.route("/books/<int:isbn>", methods=["PUT"])
+def replace_book(isbn):
+    # return jsonify(request.get_json())
+    request_data = request.get_json()
+    if (not valid_put_request_data(request_data)):
+        invalidBookObjectMsg = {
+            "error": "Valid book object must be passed in the request",
+            "helpString": "Data passed in similar to this {'name': 'bookname', 'price':7.33, 'isbn': 123}"
+        }
+    new_book = {
+        "name": request_data["name"],
+        "price": request_data["price"],
+        "isbn": isbn
+    }
+    i = 0
+    for book in books:
+        currentIsbn = book["isbn"]
+        if currentIsbn == isbn:
+            books[i] = new_book
+        i += 1
+    response = Response("", status=204)
+    return response
+
 
 def validBookObject(bookObject):
     if ("name" in bookObject and "price" in bookObject and "isbn" in bookObject):
