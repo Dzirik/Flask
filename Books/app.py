@@ -1,6 +1,8 @@
 from flask import Flask
 from flask import jsonify
 from flask import request
+from flask import Response
+import json
 
 app = Flask(__name__)
 books = [
@@ -16,10 +18,36 @@ books = [
     }
 ]
 
-# POST /books
+def validBookObject(bookObject):
+    if ("name" in bookObject and "price" in bookObject and "isbn" in bookObject):
+        return True
+    else:
+        return False
+
+# POST /bookss
 @app.route("/books", methods=["POST"])
 def add_book():
-    return jsonify(request.get_json())
+    # return jsonify(request.get_json())
+    request_data = request.get_json()
+    if (validBookObject(request_data)):
+        new_book = {
+            "name": request_data["name"],
+            "price": request_data["price"],
+            "isbn": request_data["isbn"]
+        }
+        books.insert(0, new_book)
+        response = Response("", 201, mimetype="application/json")
+        response.headers["Location"] = "/books/" + str(new_book["isbn"])
+        return response
+        #return "True"
+    else:
+        invalidBookObjectErrorMsg = {
+            "error": "Invalid book object passed in request.",
+            "helpString": "Data passed in similar to this {'name': 'bookname', 'price':7.33, 'isbn': 123}"
+        }
+        response = Response(json.dumps(invalidBookObjectErrorMsg), status=400, mimetype="application/json")
+        return response
+        #return "False"
 
 # GET /books/<isbn>
 @app.route("/books/<int:isbn>")
