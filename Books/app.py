@@ -33,9 +33,33 @@ books = [
     }
 ]
 
+@app.route("/books/<int:isbn>", methods=["DELETE"])
+def delete_book(isbn):
+    i = 0
+    for book in books:
+        if book["isbn"] == isbn:
+            books.pop(i)
+            response = Response("", status=204)
+            return response
+            # return jsonify(book)
+        i += 1
+    invalidBookObjectErrorMsg = {
+        "error": "Book with the ISBN number was not found.",
+        "helpString": "Data passed in similar to this {'name': 'bookname', 'price':7.33, 'isbn': 123}"
+    }
+    response = Response(json.dumps(invalidBookObjectErrorMsg), status=404, mimetype="application/json")
+    return response
+
+
 # PATCH
 @app.route("/books/<int:isbn>", methods=["PATCH"])
 def update_book(isbn):
+    """
+    PATCH - UPDATING
+    Aktualizuje buď jméno nebo cenu nebo oboje.
+    :param isbn:
+    :return:
+    """
     request_data = request.get_json()
     updated_book = {}
     if ("name" in request_data):
@@ -52,6 +76,12 @@ def update_book(isbn):
 # PUT
 @app.route("/books/<int:isbn>", methods=["PUT"])
 def replace_book(isbn):
+    """
+    PUT - REPLACING
+    Změní/nahradí jméno a cenu pro celou knihu podle isbn.
+    :param isbn:
+    :return:
+    """
     # return jsonify(request.get_json())
     request_data = request.get_json()
     if (not valid_put_request_data(request_data)):
