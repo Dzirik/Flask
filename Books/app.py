@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import jsonify
+from flask import request
 
 app = Flask(__name__)
 books = [
@@ -14,6 +15,11 @@ books = [
         "isbn": 234567
     }
 ]
+
+# POST /books
+@app.route("/books", methods=["POST"])
+def add_book():
+    return jsonify(request.get_json())
 
 # GET /books/<isbn>
 @app.route("/books/<int:isbn>")
